@@ -3,16 +3,39 @@ defmodule TelemetryChildInit do
   Documentation for `TelemetryChildInit`.
   """
 
-  def instrument(child_specs) when is_list(child_specs) do
-    Enum.map(child_specs, &instrument/1)
+  def instrument(child_specs, module) when is_list(child_specs) do
+    updated =
+      Enum.map(child_specs, &instrument/1)
+
+    [
+      %{
+        id: {module, :telemetry_start},
+        start: {TelemetryChildInit.Start, :init, [module]},
+        restart: :temporary,
+        type: :worker
+      }
+      | updated
+    ] ++
+      [
+        %{
+          id: {module, :telemetry_stop},
+          start: {TelemetryChildInit.Stop, :init, [module]},
+          restart: :temporary,
+          type: :worker
+        }
+      ]
+  end
+
+  def instrument(%{start: _} = child_spec) do
+    Map.update!(child_spec, :start, fn {m, f, a} ->
+      {TelemetryChildInit, :init, [{m, f, a}]}
+    end)
   end
 
   def instrument({module, args}) do
     args
     |> module.child_spec()
-    |> Map.update!(:start, fn {m, f, a} ->
-      {TelemetryChildInit, :init, [{m, f, a}]}
-    end)
+    |> instrument()
   end
 
   def instrument(module) when is_atom(module) do
@@ -24,7 +47,7 @@ defmodule TelemetryChildInit do
 
     res =
       :telemetry.span(
-        [:worker, :processing],
+        [:supervisor, :child, :init],
         metadata,
         fn ->
           result = apply(m, f, a)

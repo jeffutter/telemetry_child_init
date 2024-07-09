@@ -29,7 +29,7 @@ defmodule TelemetryChildInitTest do
         [
           {DummyChild, []}
         ]
-        |> TelemetryChildInit.instrument()
+        |> TelemetryChildInit.instrument(__MODULE__)
 
       Supervisor.init(children, strategy: :one_for_one)
     end
@@ -38,17 +38,25 @@ defmodule TelemetryChildInitTest do
   test "emits telemetry events for supervisor children" do
     ref =
       :telemetry_test.attach_event_handlers(self(), [
-        [:worker, :processing, :start],
-        [:worker, :processing, :stop],
-        [:worker, :processing, :exception]
+        [:supervisor, :startup, :start],
+        [:supervisor, :startup, :stop],
+        [:supervisor, :child, :init, :start],
+        [:supervisor, :child, :init, :stop],
+        [:supervisor, :child, :init, :exception]
       ])
 
-    start_supervised({DummySupervisor, []})
+    {:ok, _pid} = start_supervised({DummySupervisor, []})
 
-    assert_receive {[:worker, :processing, :start], ^ref, %{},
+    assert_receive {[:supervisor, :startup, :start], ^ref, %{start: _},
+                    %{module: DummySupervisor}}
+
+    assert_receive {[:supervisor, :child, :init, :start], ^ref, %{},
                     %{module: DummyChild, function: :start_link}}
 
-    assert_receive {[:worker, :processing, :stop], ^ref, %{duration: _},
+    assert_receive {[:supervisor, :child, :init, :stop], ^ref, %{duration: _},
                     %{module: DummyChild, function: :start_link}}
+
+    assert_receive {[:supervisor, :startup, :stop], ^ref, %{stop: _, duration: _},
+                    %{module: DummySupervisor}}
   end
 end
