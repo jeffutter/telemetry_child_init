@@ -48,14 +48,17 @@ defmodule TelemetryChildInitTest do
     {:ok, _pid} = start_supervised({DummySupervisor, []})
 
     assert_receive {[:supervisor, :startup, :start], ^ref, %{start: _},
-                    %{supervisor_module: DummySupervisor, ref: super_ref}}
+                    %{
+                      supervisor_module: DummySupervisor,
+                      telemetry_span_context: telemetry_span_context
+                    }}
 
     assert_receive {[:supervisor, :child, :init, :start], ^ref, %{},
                     %{
                       supervisor_module: DummySupervisor,
                       module: DummyChild,
                       function: :start_link,
-                      ref: ^super_ref
+                      telemetry_span_context: ^telemetry_span_context
                     }}
 
     assert_receive {[:supervisor, :child, :init, :stop], ^ref, %{duration: child_duration},
@@ -63,14 +66,17 @@ defmodule TelemetryChildInitTest do
                       supervisor_module: DummySupervisor,
                       module: DummyChild,
                       function: :start_link,
-                      ref: ^super_ref
+                      telemetry_span_context: ^telemetry_span_context
                     }}
 
     assert child_duration >= 1000
 
     assert_receive {[:supervisor, :startup, :stop], ^ref,
                     %{stop: _, duration: supervisor_duration},
-                    %{supervisor_module: DummySupervisor, ref: ^super_ref}}
+                    %{
+                      supervisor_module: DummySupervisor,
+                      telemetry_span_context: ^telemetry_span_context
+                    }}
 
     assert supervisor_duration >= 1000
   end
