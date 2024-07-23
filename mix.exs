@@ -1,28 +1,26 @@
 defmodule TelemetryChildInit.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+  @source_url "https://github.com/jeffutter/telemetry_child_init"
+
   def project do
     [
       app: :telemetry_child_init,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "TelemetryChildInit",
-      source_url: "https://github.com/jeffutter/telemetry_child_init",
+      source_url: @source_url,
       description: description(),
-      package: package()
+      package: package(),
+      docs: docs()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [extra_applications: [:logger]]
-  end
-
-  # Run "mix help deps" to learn about dependencies.
-  defp deps do
-    [{:telemetry, "~> 1.2.1"}]
   end
 
   defp description() do
@@ -32,10 +30,26 @@ defmodule TelemetryChildInit.MixProject do
   defp package() do
     [
       name: "telemetry_child_init",
-      files:
-        ~w(lib priv .formatter.exs mix.exs README* readme* LICENSE* license* CHANGELOG* changelog* src),
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/jeffutter/telemetry_child_init"}
+      links: %{"GitHub" => @source_url}
+    ]
+  end
+
+  def docs do
+    [
+      main: "TelemetryChildInit",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      api_reference: false,
+      extra_section: []
+    ]
+  end
+
+  defp deps do
+    [
+      {:telemetry, "~> 1.2.1"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 end

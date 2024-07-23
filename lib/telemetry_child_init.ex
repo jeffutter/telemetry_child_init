@@ -1,7 +1,9 @@
 defmodule TelemetryChildInit do
-  @moduledoc """
-  Documentation for `TelemetryChildInit`.
-  """
+  @external_resource readme = "README.md"
+  @moduledoc readme
+             |> File.read!()
+             |> String.split("<!--MDOC !-->")
+             |> Enum.fetch!(1)
 
   def instrument(child_specs, supervisor_module) when is_list(child_specs) do
     telemetry_span_context = make_ref()

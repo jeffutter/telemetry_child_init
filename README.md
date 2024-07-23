@@ -1,5 +1,7 @@
 # TelemetryChildInit
 
+<!--MDOC !-->
+
 Add telemetry events to your supervisors to track child startup times.
 
 ## Installation
