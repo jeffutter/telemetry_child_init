@@ -4,7 +4,7 @@ defmodule TelemetryChildInit.MixProject do
   def project do
     [
       app: :telemetry_child_init,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -21,7 +21,7 @@ defmodule TelemetryChildInit.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:telemetry, "~> 1.2.1"}
+      {:telemetry, "~> 1.2"}
     ]
   end
 end
